@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+
+server:
+  port: ${SERVER_PORT:8092}
+
+dms:
+  audit:
+    exchange: ${DMS_AUDIT_EXCHANGE:audit.events}
+    queue: ${DMS_AUDIT_QUEUE:audit.events.consumer}
+    routing-key: ${DMS_AUDIT_ROUTING_KEY:audit.events.#}
+    index-prefix: ${DMS_AUDIT_INDEX_PREFIX:audit-events}
+  cors:
+    allowed-origins: ${DMS_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-methods: ${DMS_CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
+    allowed-headers: ${DMS_CORS_ALLOWED_HEADERS:*}
+    allow-credentials: ${DMS_CORS_ALLOW_CREDENTIALS:true}
+
+logging:
+  level:
+    br.com.dms.audit: INFO
