@@ -10,6 +10,7 @@ public record AuditEventMessage(
     String eventType,
     Instant occurredAt,
     String userId,
+    String tenantId,
     String entityType,
     String entityId,
     String filename,

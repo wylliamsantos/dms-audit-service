@@ -9,6 +9,7 @@ public record AuditEventView(
     Instant occurredAt,
     Instant ingestedAt,
     String userId,
+    String tenantId,
     String entityType,
     String entityId,
     String filename,
