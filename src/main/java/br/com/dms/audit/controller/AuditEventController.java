@@ -11,10 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
@@ -41,6 +44,10 @@ public class AuditEventController {
                                                            @RequestParam(name = "occurredAtTo", required = false)
                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant occurredAtTo,
                                                            @PageableDefault(size = 50) Pageable pageable) {
+
+        if (!StringUtils.hasText(tenantId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
+        }
 
         AuditEventSearchParams params = AuditEventSearchParams.of(userId, tenantId, entityId, entityType, eventType, occurredAtFrom, occurredAtTo);
         Page<AuditEventSearchHit> page = queryService.search(params, pageable);
