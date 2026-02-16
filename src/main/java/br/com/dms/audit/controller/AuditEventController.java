@@ -32,6 +32,7 @@ public class AuditEventController {
 
     @GetMapping
     public ResponseEntity<AuditEventSearchResponse> search(@RequestParam(name = "userId", required = false) String userId,
+                                                           @RequestParam(name = "tenantId", required = false) String tenantId,
                                                            @RequestParam(name = "entityId", required = false) String entityId,
                                                            @RequestParam(name = "entityType", required = false) String entityType,
                                                            @RequestParam(name = "eventType", required = false) String eventType,
@@ -41,7 +42,7 @@ public class AuditEventController {
                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant occurredAtTo,
                                                            @PageableDefault(size = 50) Pageable pageable) {
 
-        AuditEventSearchParams params = AuditEventSearchParams.of(userId, entityId, entityType, eventType, occurredAtFrom, occurredAtTo);
+        AuditEventSearchParams params = AuditEventSearchParams.of(userId, tenantId, entityId, entityType, eventType, occurredAtFrom, occurredAtTo);
         Page<AuditEventSearchHit> page = queryService.search(params, pageable);
 
         List<AuditEventView> views = page.getContent().stream()
@@ -67,6 +68,7 @@ public class AuditEventController {
             document.occurredAt() != null ? Instant.ofEpochMilli(document.occurredAt()) : null,
             document.ingestedAt() != null ? Instant.ofEpochMilli(document.ingestedAt()) : null,
             document.userId(),
+            document.tenantId(),
             document.entityType(),
             document.entityId(),
             document.filename(),

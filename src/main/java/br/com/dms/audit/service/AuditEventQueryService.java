@@ -46,6 +46,7 @@ public class AuditEventQueryService {
         Criteria criteria = null;
 
         criteria = addCriteria(criteria, params.userId(), "userId");
+        criteria = addCriteria(criteria, params.tenantId(), "tenantId");
         criteria = addCriteria(criteria, params.entityId(), "entityId");
         criteria = addCriteria(criteria, params.entityType(), "entityType");
         criteria = addCriteria(criteria, params.eventType(), "eventType");

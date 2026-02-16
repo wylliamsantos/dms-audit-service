@@ -5,6 +5,7 @@ import java.util.Optional;
 
 public record AuditEventSearchParams(
     Optional<String> userId,
+    Optional<String> tenantId,
     Optional<String> entityId,
     Optional<String> entityType,
     Optional<String> eventType,
@@ -12,6 +13,7 @@ public record AuditEventSearchParams(
     Optional<Instant> occurredAtTo
 ) {
     public static AuditEventSearchParams of(String userId,
+                                            String tenantId,
                                             String entityId,
                                             String entityType,
                                             String eventType,
@@ -19,6 +21,7 @@ public record AuditEventSearchParams(
                                             Instant occurredAtTo) {
         return new AuditEventSearchParams(
             Optional.ofNullable(trimToNull(userId)),
+            Optional.ofNullable(trimToNull(tenantId)),
             Optional.ofNullable(trimToNull(entityId)),
             Optional.ofNullable(trimToNull(entityType)),
             Optional.ofNullable(trimToNull(eventType)),
