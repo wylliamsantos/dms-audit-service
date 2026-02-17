@@ -65,7 +65,7 @@ public class AuditEventQueryService {
         }
 
         Query query = (criteria == null) ? Query.findAll() : new CriteriaQuery(criteria);
-        query.addSort(Sort.by(Sort.Direction.DESC, "occurredAt"));
+        query.addSort(Sort.by(Sort.Direction.DESC, "ingestedAt"));
         query.setPageable(pageable);
         return query;
     }
