@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +37,7 @@ public class AuditEventController {
     @GetMapping
     public ResponseEntity<AuditEventSearchResponse> search(@RequestParam(name = "userId", required = false) String userId,
                                                            @RequestParam(name = "tenantId", required = false) String tenantId,
+                                                           @RequestHeader(name = "X-Tenant-Id", required = false) String tenantIdHeader,
                                                            @RequestParam(name = "entityId", required = false) String entityId,
                                                            @RequestParam(name = "entityType", required = false) String entityType,
                                                            @RequestParam(name = "eventType", required = false) String eventType,
@@ -45,11 +47,8 @@ public class AuditEventController {
                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant occurredAtTo,
                                                            @PageableDefault(size = 50) Pageable pageable) {
 
-        if (!StringUtils.hasText(tenantId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
-        }
-
-        AuditEventSearchParams params = AuditEventSearchParams.of(userId, tenantId, entityId, entityType, eventType, occurredAtFrom, occurredAtTo);
+        String resolvedTenantId = resolveTenantId(tenantId, tenantIdHeader);
+        AuditEventSearchParams params = AuditEventSearchParams.of(userId, resolvedTenantId, entityId, entityType, eventType, occurredAtFrom, occurredAtTo);
         Page<AuditEventSearchHit> page = queryService.search(params, pageable);
 
         List<AuditEventView> views = page.getContent().stream()
@@ -65,6 +64,22 @@ public class AuditEventController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    private String resolveTenantId(String tenantId, String tenantIdHeader) {
+        String requestTenantId = StringUtils.hasText(tenantId) ? tenantId.trim() : null;
+        String headerTenantId = StringUtils.hasText(tenantIdHeader) ? tenantIdHeader.trim() : null;
+
+        if (headerTenantId != null && requestTenantId != null && !headerTenantId.equals(requestTenantId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "tenantId mismatch between header and query param");
+        }
+
+        String resolvedTenantId = headerTenantId != null ? headerTenantId : requestTenantId;
+        if (!StringUtils.hasText(resolvedTenantId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required (query param or X-Tenant-Id header)");
+        }
+
+        return resolvedTenantId;
     }
 
     private AuditEventView toView(AuditEventSearchHit hit) {
