@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class AuditEventListener {
@@ -24,6 +25,14 @@ public class AuditEventListener {
             logger.warn("Received null audit event message");
             return;
         }
+        if (!StringUtils.hasText(message.tenantId())) {
+            logger.warn("event_rejected reason=missing_tenant_id eventType={} entityType={} entityId={}",
+                message.eventType(),
+                message.entityType(),
+                message.entityId());
+            return;
+        }
+
         logger.debug("Received audit event {} for entity {}", message.eventType(), message.entityId());
         auditEventIndexer.index(message);
     }
