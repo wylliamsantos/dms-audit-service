@@ -8,6 +8,11 @@ spring:
     password: guest
   elasticsearch:
     uris: http://localhost:9200
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/dms}
 
 server:
   port: 8092
