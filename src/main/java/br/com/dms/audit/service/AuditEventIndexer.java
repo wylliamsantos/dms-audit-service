@@ -30,7 +30,7 @@ public class AuditEventIndexer {
         this.indexPrefix = indexPrefix;
     }
 
-    public void index(AuditEventMessage message) {
+    public boolean index(AuditEventMessage message) {
         Instant occurredAt = message.occurredAt() != null ? message.occurredAt() : Instant.now();
         String indexName = String.format("%s-%s", indexPrefix, INDEX_SUFFIX_FORMATTER.format(occurredAt));
 
@@ -39,9 +39,19 @@ public class AuditEventIndexer {
         AuditEventDocument document = AuditEventDocument.fromMessage(message, Instant.now());
 
         try {
+            if (document.id() != null && elasticsearchOperations.exists(document.id(), IndexCoordinates.of(indexName))) {
+                logger.info("Skipping duplicate audit event by idempotencyKey={} eventType={} entityId={}",
+                    document.id(),
+                    message.eventType(),
+                    message.entityId());
+                return false;
+            }
+
             elasticsearchOperations.save(document, IndexCoordinates.of(indexName));
+            return true;
         } catch (Exception exception) {
             logger.error("Failed to index audit event {} in index {}", message.eventType(), indexName, exception);
+            return false;
         }
     }
 

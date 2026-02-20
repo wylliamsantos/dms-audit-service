@@ -45,6 +45,7 @@ class AuditEventControllerSecurityTest {
     @BeforeEach
     void setupQueryService() {
         AuditEventDocument document = new AuditEventDocument(
+            null,
             "DOCUMENT_INDEXED",
             Instant.parse("2026-02-16T15:00:00Z").toEpochMilli(),
             Instant.parse("2026-02-16T15:00:01Z").toEpochMilli(),

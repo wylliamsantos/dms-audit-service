@@ -56,6 +56,7 @@ class AuditEventControllerTest {
     @Test
     void shouldReturnSearchResponseWhenTenantIdIsPresent() {
         AuditEventDocument document = new AuditEventDocument(
+            null,
             "DOCUMENT_INDEXED",
             Instant.parse("2026-02-16T15:00:00Z").toEpochMilli(),
             Instant.parse("2026-02-16T15:00:01Z").toEpochMilli(),
@@ -64,8 +65,8 @@ class AuditEventControllerTest {
             "DOCUMENT",
             "doc-123",
             "contract.pdf",
-            Map.of("source", "watch"),
-            Map.of("status", "indexed")
+            Map.<String, Object>of("source", "watch"),
+            Map.<String, Object>of("status", "indexed")
         );
 
         Mockito.when(queryService.search(Mockito.any(), Mockito.any()))
@@ -93,6 +94,7 @@ class AuditEventControllerTest {
     @Test
     void shouldAcceptTenantFromHeaderOnly() {
         AuditEventDocument document = new AuditEventDocument(
+            null,
             "DOCUMENT_INDEXED",
             Instant.parse("2026-02-16T15:00:00Z").toEpochMilli(),
             Instant.parse("2026-02-16T15:00:01Z").toEpochMilli(),
