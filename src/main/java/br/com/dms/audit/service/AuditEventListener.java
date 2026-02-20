@@ -34,6 +34,9 @@ public class AuditEventListener {
         }
 
         logger.debug("Received audit event {} for entity {}", message.eventType(), message.entityId());
-        auditEventIndexer.index(message);
+        boolean indexed = auditEventIndexer.index(message);
+        if (!indexed) {
+            logger.info("event_deduplicated eventType={} entityType={} entityId={}", message.eventType(), message.entityType(), message.entityId());
+        }
     }
 }
