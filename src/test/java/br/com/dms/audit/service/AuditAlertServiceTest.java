@@ -52,6 +52,24 @@ class AuditAlertServiceTest {
         assertThat(alerts).extracting(AuditAlert::code).contains("MULTIPLE_IPS_PER_USER");
     }
 
+    @Test
+    void shouldIncludeEventsOnBoundaryWindow() {
+        List<AuditEventDocument> events = List.of(
+            event("AUTH_FAILURE", "user-a", "10.1.0.1", "2026-03-05T03:26:00Z"),
+            event("AUTH_FAILURE", "user-a", "10.1.0.1", "2026-03-05T03:26:00Z"),
+            event("LOGIN_FAILED", "user-a", "10.1.0.1", "2026-03-05T03:26:00Z"),
+            event("DOCUMENT_ACCESS_DENIED", "user-a", "10.1.0.1", "2026-03-05T03:26:00Z"),
+            event("AUTH_FAILURE", "user-a", "10.1.0.1", "2026-03-05T03:26:00Z")
+        );
+
+        Mockito.when(queryService.findRecentByTenant(Mockito.eq("tenant-a"), Mockito.any(), Mockito.eq(800)))
+            .thenReturn(events);
+
+        List<AuditAlert> alerts = service.findActiveAlerts("tenant-a");
+
+        assertThat(alerts).extracting(AuditAlert::code).contains("FAILED_ACCESS_SPIKE");
+    }
+
     private AuditEventDocument event(String type, String userId, String ip, String occurredAt) {
         return new AuditEventDocument(
             null,

@@ -126,7 +126,8 @@ public class AuditAlertService {
         if (event.occurredAt() == null) {
             return false;
         }
-        return Instant.ofEpochMilli(event.occurredAt()).isAfter(threshold);
+        Instant occurredAt = Instant.ofEpochMilli(event.occurredAt());
+        return !occurredAt.isBefore(threshold);
     }
 
     private String userOrIp(AuditEventDocument event) {
