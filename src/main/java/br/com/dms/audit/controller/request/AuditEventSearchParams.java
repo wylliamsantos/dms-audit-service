@@ -9,6 +9,7 @@ public record AuditEventSearchParams(
     Optional<String> entityId,
     Optional<String> entityType,
     Optional<String> eventType,
+    Optional<String> ip,
     Optional<Instant> occurredAtFrom,
     Optional<Instant> occurredAtTo
 ) {
@@ -17,6 +18,7 @@ public record AuditEventSearchParams(
                                             String entityId,
                                             String entityType,
                                             String eventType,
+                                            String ip,
                                             Instant occurredAtFrom,
                                             Instant occurredAtTo) {
         return new AuditEventSearchParams(
@@ -25,6 +27,7 @@ public record AuditEventSearchParams(
             Optional.ofNullable(trimToNull(entityId)),
             Optional.ofNullable(trimToNull(entityType)),
             Optional.ofNullable(trimToNull(eventType)),
+            Optional.ofNullable(trimToNull(ip)),
             Optional.ofNullable(occurredAtFrom),
             Optional.ofNullable(occurredAtTo)
         );
