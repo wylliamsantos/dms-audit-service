@@ -4,6 +4,7 @@ import br.com.dms.audit.controller.response.AuditEventSearchResponse;
 import br.com.dms.audit.model.AuditEventDocument;
 import br.com.dms.audit.service.AuditEventQueryService;
 import br.com.dms.audit.service.AuditEventSearchHit;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
@@ -21,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AuditEventControllerTest {
 
     private final AuditEventQueryService queryService = Mockito.mock(AuditEventQueryService.class);
-    private final AuditEventController controller = new AuditEventController(queryService);
+    private final AuditEventController controller = new AuditEventController(queryService, new ObjectMapper());
 
     @Test
     void shouldRejectSearchWithoutTenantId() {
-        assertThatThrownBy(() -> controller.search(null, null, null, null, null, null, null, null, PageRequest.of(0, 50)))
+        assertThatThrownBy(() -> controller.search(null, null, null, null, null, null, null, null, null, PageRequest.of(0, 50)))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("400 BAD_REQUEST")
             .hasMessageContaining("tenantId is required");
@@ -39,6 +40,7 @@ class AuditEventControllerTest {
             null,
             "tenant-a",
             "tenant-b",
+            null,
             null,
             null,
             null,
@@ -81,6 +83,7 @@ class AuditEventControllerTest {
             null,
             null,
             null,
+            null,
             PageRequest.of(0, 50)
         );
 
@@ -114,6 +117,7 @@ class AuditEventControllerTest {
             "user-1",
             null,
             "tenant-header",
+            null,
             null,
             null,
             null,
