@@ -5,6 +5,7 @@ import br.com.dms.audit.model.AuditEventDocument;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -33,13 +34,30 @@ public class AuditEventQueryService {
 
     public Page<AuditEventSearchHit> search(AuditEventSearchParams params, Pageable pageable) {
         Query query = buildQuery(params, pageable);
-        String indexPattern = indexPrefix + "-*";
-        SearchHits<AuditEventDocument> hits = elasticsearchOperations.search(query, AuditEventDocument.class, IndexCoordinates.of(indexPattern));
+        SearchHits<AuditEventDocument> hits = searchInternal(query);
         List<AuditEventSearchHit> content = hits.getSearchHits().stream()
             .filter(hit -> hit.getContent() != null)
             .map(hit -> new AuditEventSearchHit(hit.getId(), hit.getContent()))
             .toList();
         return new PageImpl<>(content, pageable, hits.getTotalHits());
+    }
+
+    public List<AuditEventDocument> findRecentByTenant(String tenantId, Instant from, int limit) {
+        Criteria criteria = new Criteria("tenantId").is(tenantId)
+            .and(new Criteria("occurredAt").greaterThanEqual(from.toEpochMilli()));
+        CriteriaQuery query = new CriteriaQuery(criteria);
+        query.addSort(Sort.by(Sort.Direction.DESC, "occurredAt"));
+        query.setPageable(PageRequest.of(0, Math.max(1, Math.min(limit, 2000))));
+        SearchHits<AuditEventDocument> hits = searchInternal(query);
+        return hits.getSearchHits().stream()
+            .map(org.springframework.data.elasticsearch.core.SearchHit::getContent)
+            .filter(java.util.Objects::nonNull)
+            .toList();
+    }
+
+    private SearchHits<AuditEventDocument> searchInternal(Query query) {
+        String indexPattern = indexPrefix + "-*";
+        return elasticsearchOperations.search(query, AuditEventDocument.class, IndexCoordinates.of(indexPattern));
     }
 
     private Query buildQuery(AuditEventSearchParams params, Pageable pageable) {
