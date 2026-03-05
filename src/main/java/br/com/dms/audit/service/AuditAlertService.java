@@ -1,6 +1,7 @@
 package br.com.dms.audit.service;
 
 import br.com.dms.audit.model.AuditEventDocument;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class AuditAlertService {
     private final Clock clock;
     private final int lookbackMinutes;
 
+    @Autowired
     public AuditAlertService(AuditEventQueryService queryService,
                              @Value("${dms.audit.alerts.lookback-minutes:30}") int lookbackMinutes) {
         this(queryService, Clock.systemUTC(), lookbackMinutes);
