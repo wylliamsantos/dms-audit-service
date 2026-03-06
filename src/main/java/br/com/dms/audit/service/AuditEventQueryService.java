@@ -65,7 +65,7 @@ public class AuditEventQueryService {
 
         criteria = addCriteria(criteria, params.userId(), "userId");
         criteria = addCriteria(criteria, params.tenantId(), "tenantId");
-        criteria = addCriteria(criteria, params.entityId(), "entityId");
+        criteria = addEntityIdCriteria(criteria, params.entityId());
         criteria = addCriteria(criteria, params.entityType(), "entityType");
         criteria = addCriteria(criteria, params.eventType(), "eventType");
         criteria = addIpCriteria(criteria, params.ip());
@@ -94,6 +94,20 @@ public class AuditEventQueryService {
             return and(base, new Criteria(field).is(value.get()));
         }
         return base;
+    }
+
+    private Criteria addEntityIdCriteria(Criteria base, Optional<String> entityId) {
+        if (entityId.isEmpty()) {
+            return base;
+        }
+
+        String value = entityId.get();
+        Criteria entityCriteria = new Criteria("entityId").is(value)
+            .or(new Criteria("entityId.keyword").is(value))
+            .or(new Criteria("attributes.documentId").is(value))
+            .or(new Criteria("metadata.documentId").is(value));
+
+        return and(base, entityCriteria);
     }
 
     private Criteria addIpCriteria(Criteria base, Optional<String> ip) {
